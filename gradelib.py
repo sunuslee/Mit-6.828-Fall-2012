@@ -1,7 +1,6 @@
 import sys, os, re, time, socket, select, subprocess, errno, shutil
 from subprocess import check_call, Popen
 from optparse import OptionParser
-
 __all__ = []
 
 ##################################################################

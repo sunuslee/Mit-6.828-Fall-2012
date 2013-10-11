@@ -140,6 +140,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	lfile = 0;
 	rfile = (stab_end - stabs) - 1;
 	stab_binsearch(stabs, &lfile, &rfile, N_SO, addr);
+	cprintf("lfile: %d\trfile: %d\n", lfile, rfile);
 	if (lfile == 0)
 		return -1;
 
@@ -148,6 +149,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	lfun = lfile;
 	rfun = rfile;
 	stab_binsearch(stabs, &lfun, &rfun, N_FUN, addr);
+	cprintf("lfun: %d\trlun: %d\n", lfun, rfun);
 
 	if (lfun <= rfun) {
 		// stabs[lfun] points to the function name
@@ -168,8 +170,6 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	}
 	// Ignore stuff after the colon.
 	info->eip_fn_namelen = strfind(info->eip_fn_name, ':') - info->eip_fn_name;
-
-
 	// Search within [lline, rline] for the line number stab.
 	// If found, set info->eip_line to the right line number.
 	// If not found, return -1.
@@ -179,8 +179,12 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	Look at the STABS documentation and <inc/stab.h> to find
 	//	which one.
 	// Your code here.
+	// SUNUS, 2013-10-09
+	cprintf("Before Search: lline: %d\t%d\n", lline, rline);
 
-
+	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+	info->eip_line = stabs[lline].n_desc;
+	cprintf("After Search: lline: %d\t%d\n", lline, rline);
 	// Search backwards from the line number for the relevant filename
 	// stab.
 	// We can't just use the "lfile" stab because inlined functions

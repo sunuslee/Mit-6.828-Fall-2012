@@ -25,7 +25,7 @@
 #define	N_BSLINE	0x48	// bss segment line number
 #define	N_SSYM		0x60	// structure/union element
 #define	N_SO		0x64	// main source file name
-#define	N_LSYM		0x80	// stack variable
+#define	N_LSYM		0x7f	// stack variable
 #define	N_BINCL		0x82	// include file beginning
 #define	N_SOL		0x84	// included source file name
 #define	N_PSYM		0xa0	// parameter variable

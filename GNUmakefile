@@ -60,7 +60,7 @@ QEMU := $(shell if which qemu > /dev/null; \
 	echo "*** or have you tried setting the QEMU variable in conf/env.mk?" 1>&2; \
 	echo "***" 1>&2; exit 1)
 endif
-
+QEMU=/home/sunus/myProjects/6828/jos-qemu/bin/qemu
 # try to generate a unique GDB port
 GDBPORT	:= $(shell expr `id -u` % 5000 + 25000)
 
