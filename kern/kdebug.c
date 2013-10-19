@@ -47,6 +47,31 @@ extern const char __STABSTR_END__[];		// End of string table
 //		stab_binsearch(stabs, &left, &right, N_SO, 0xf0100184);
 //	will exit setting left = 118, right = 554.
 //
+
+
+// SUNUS, 2013, 10, 12
+// add a quick & dirct fix to skip stabs N_FUN entry with n_value below KERNBASE
+
+#define N_INVAILD_FUN 0x73
+static void stabs_fix()
+{
+	const struct Stab *stabs, *stab_end;
+    stabs = __STAB_BEGIN__;
+	stab_end = __STAB_END__;
+    static int is_fixed = 0;
+    int i = 0;
+    uint8_t *p_fix;
+    if(is_fixed)
+        return ;
+    for(; i < stab_end - stabs; i++) {
+        if ((stabs[i].n_type == N_FUN) && (stabs[i].n_value < KERNBASE)) {
+            p_fix = (uint8_t *)&stabs[i].n_type;
+            *p_fix = N_INVAILD_FUN;
+        }
+    }
+    cprintf("stabs fixed!\n");
+    is_fixed = 1;
+}
 static void
 stab_binsearch(const struct Stab *stabs, int *region_left, int *region_right,
 	       int type, uintptr_t addr)
@@ -117,13 +142,14 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	info->eip_fn_narg = 0;
 
 	// Find the relevant set of stabs
+    stabs_fix();
 	if (addr >= ULIM) {
 		stabs = __STAB_BEGIN__;
 		stab_end = __STAB_END__;
 		stabstr = __STABSTR_BEGIN__;
 		stabstr_end = __STABSTR_END__;
 	} else {
-		// Can't search for user-level addresses yet!
+                // Can't search for user-level addresses yet!
   	        panic("User address");
 	}
 
@@ -168,8 +194,6 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	}
 	// Ignore stuff after the colon.
 	info->eip_fn_namelen = strfind(info->eip_fn_name, ':') - info->eip_fn_name;
-
-
 	// Search within [lline, rline] for the line number stab.
 	// If found, set info->eip_line to the right line number.
 	// If not found, return -1.
@@ -179,8 +203,9 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	//	Look at the STABS documentation and <inc/stab.h> to find
 	//	which one.
 	// Your code here.
-
-
+	// SUNUS, 2013-10-09
+	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+	info->eip_line = stabs[lline].n_desc;
 	// Search backwards from the line number for the relevant filename
 	// stab.
 	// We can't just use the "lfile" stab because inlined functions
