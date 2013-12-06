@@ -257,8 +257,7 @@ page_init(void)
 	size_t i;
 	uint32_t nextfree = (uint32_t)boot_alloc(0);
 	pages[0].pp_ref = 1;
-	cprintf("NPAGES: %d NPAGES_BASE_MEM: %d\n", npages, npages_basemem);
-	cprintf("NEXTFREE: %08x IOPHY: %08x  EXT: %08x\n", nextfree - KERNBASE, IOPHYSMEM, EXTPHYSMEM);
+	debug(DEBUG_INFO, "NPAGES: %d NPAGES_BASE_MEM: %d\n", npages, npages_basemem);
 	for (i = 1; i < npages; i++) {
 		if ((i >= (IOPHYSMEM / PGSIZE)) && (i < ((nextfree - KERNBASE)/ PGSIZE))) {
 			pages[i].pp_ref = 1;
